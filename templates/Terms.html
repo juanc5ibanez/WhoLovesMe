@@ -1,0 +1,30 @@
+{%  extends "Layout.html" %}
+{% block body %}
+    <table class="table">
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Creation date
+            </th>
+            <th>
+                Term
+            </th>
+        </tr>
+
+    {% for term in terms %}
+        <tr>
+            <td>
+                {{ term.Id }}
+            </td>
+            <td>
+                {{ term.CreationDate }}
+            </td>
+            <td>
+                {{ term.Content }}
+            </td>
+        </tr>
+    {%  endfor %}
+    </table>
+{% endblock %}
