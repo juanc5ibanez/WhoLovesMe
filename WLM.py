@@ -1,4 +1,6 @@
 import os
+import uuid
+
 import Storage
 import Term
 from flask import Flask, request, session, g, redirect, url_for, abort, \
@@ -26,10 +28,14 @@ def terms():
     terms = storage.GetTerms()
     return render_template('Terms.html',terms = terms)
 
-
+@app.route('/Terms/Delete/<termId>')
+def delete_term(termId=None):
+    storage.DeteTerm(Term.Term('',id = uuid.UUID(termId)))
+    return redirect(url_for('terms'))
 
 
 
 
 if __name__ == '__main__':
     app.run()
+    storage.Initialize()
