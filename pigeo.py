@@ -449,7 +449,25 @@ def geo_lp_iterable(twitter_users,return_address=False, lpmodel_file='./models/l
 	
 	return results	 
 	
+def load_model_unzipped(model_dir='./models/lrworld'):
+	""" Given a directory, loads the saved (pickled and gzipped) geolocation model into memory.
+	"""
+	if not os.path.exists(model_dir):
+		logging.error('The input directory with --model/-m option does not exist: ' + model_dir)
+		logging.error('If it is the first time you are using pigeo, please run download_models.sh or manually download the models from https://drive.google.com/file/d/0B9ZfPKPvp-JibDlLNTJnMnlQZ3c/view?usp=sharing or https://www.dropbox.com/s/gw8z0r5nq5ccok0/models.tar?dl=0')
+		sys.exit(-1)
 
+	logging.info('loading the saved model from pickle files in ' + model_dir)
+	logging.info('it might take about 2 minutes...')
+	logging.debug('loading coordinate city mappings...')
+	params.coordinate_address = pickle.load(open(os.path.join(model_dir, 'coordinate_address.pkl'), 'rb'))
+	params.label_coordinate = pickle.load(open(os.path.join(model_dir, 'label_coordinate.pkl'), 'rb'))
+	logging.debug('loading feature extractor ...')
+	params.vectorizer = pickle.load(open(os.path.join(model_dir, 'vectorizer.pkl'), 'rb'))
+	params.vectorizer.features = params.vectorizer.get_feature_names()
+	logging.debug('loading the trained classifier ...')
+	params.clf = pickle.load(open(os.path.join(model_dir, 'clf.pkl'), 'rb'))
+	params.model_loaded = True
 
 		
 def load_model(model_dir='./models/lrworld'):
