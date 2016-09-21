@@ -38,4 +38,3 @@ def delete_term(termId=None):
 
 if __name__ == '__main__':
     app.run()
-    storage.Initialize()

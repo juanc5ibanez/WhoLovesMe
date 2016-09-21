@@ -1,5 +1,5 @@
 class ProcessedTweet:
-    def __init__(self,term,id_str,text,latitude,longitude,country,state,city,creation_date):
+    def __init__(self,term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score):
         self.term = term
         self.id_str = id_str
         self.text = text
@@ -9,3 +9,8 @@ class ProcessedTweet:
         self.state=state
         self.city=city
         self.creation_date=creation_date
+        self.polarity = polarity
+        self.subjectivity = subjectivity
+        self.classification = classification
+        self.neg_score = neg_score
+        self.pos_score = pos_score

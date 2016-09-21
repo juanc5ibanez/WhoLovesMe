@@ -1,48 +1,92 @@
+import psycopg2
 import uuid
 
-from cassandra.cluster import Cluster
+from datetime import datetime
+
 import Term
+from json import dumps
+
+import UserUpdate
+
 
 class Storage:
     def __init__(self):
-        self.cluster = Cluster(['192.168.10.112'])
-        self.session = self.cluster.connect("wlm")
-        self.session.execute(
-            "CREATE TABLE IF NOT EXISTS wlm.terms2( terms_id uuid, content text,creation_Date timestamp, PRIMARY KEY(content,terms_id))")
-        self.session.execute(
-            "CREATE TABLE IF NOT EXISTS wlm.user_updates(term text, created_at text, favorite_count int, favorited boolean, filter_level text, id_str text, lang text,possibly_sensitive boolean, retweet_count int,source text, text text, timestamp_ms text, user_id_str text, user_lang text, user_screen_name text, user_location text,creation_date timestamp , PRIMARY KEY(term,id_str) )")
-        self.session.execute(
-            "CREATE TABLE IF NOT EXISTS wlm.processed_updates(term text,id_str text,text text,latitude float,longitude float,country text,state text,city text,creation_date timestamp, PRIMARY KEY(term,country,creation_date,state,city,id_str))")
+
+        self.connection = psycopg2.connect("host='172.17.0.2' user=postgres password=Aa@123456 dbname=wlm")
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS terms( terms_id uuid, content text,creation_Date timestamp, PRIMARY KEY(terms_id))")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS user_updates(term text, created_at text, favorite_count int, favorited boolean, filter_level text, id_str text, lang text,possibly_sensitive boolean, retweet_count integer,source text, text text, timestamp_ms text, user_id_str text, user_lang text, user_screen_name text, user_location text,creation_date timestamp , PRIMARY KEY(id_str) )")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS processed_updates(term text,id_str text,text text,latitude double precision,longitude double precision,country text,state text,city text,creation_date timestamp,polarity double precision,subjectivity double precision,classification text,neg_score double precision,pos_score double precision,PRIMARY KEY(id_str))")
+        self.connection.commit()
+        #self.Backup()
 
 
     def SaveTerm(self,term):
-        self.session.execute("insert into terms2 (terms_id,content,creation_Date) VALUES(%s,%s,%s)", (term.Id,term.Content,term.CreationDate))
+        cursor = self.connection.cursor()
+        cursor.execute("insert into terms (terms_id,content,creation_Date) VALUES(%s,%s,%s)", (str(term.Id),term.Content,term.CreationDate))
+        self.connection.commit();
 
     def GetTerms(self):
-        results = self.session.execute("select * from wlm.terms2")
+        cursor = self.connection.cursor()
+        cursor.execute("select terms_id,content,creation_Date from terms;")
+        rows = cursor.fetchall()
         returnValues = []
-        for row in results:
-            returnValues.append(Term.Term(row.content,row.terms_id,row.creation_date))
+        for row in rows:
+            returnValues.append(Term.Term(row[1],row[0],row[2]))
         return returnValues
 
     def DeteTerm(self,term):
-        self.session.execute("delete from wlm.terms2 where terms_id = %s",(term.Id,))
+        cursor = self.connection.cursor()
+        cursor.execute("delete from terms where terms_id = %s",(str(term.Id),))
 
     def SaveUserUpdate(self,userUpdate):
-        self.session.execute("insert into wlm.user_updates(term,created_at,favorite_count,favorited, filter_level, id_str, lang,possibly_sensitive, retweet_count,source, text, timestamp_ms, user_id_str, user_lang, user_screen_name, user_location,creation_date)"
-                        " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "insert into user_updates(term,created_at,favorite_count,favorited, filter_level, id_str, lang,possibly_sensitive, retweet_count,source, text, timestamp_ms, user_id_str, user_lang, user_screen_name, user_location,creation_date)"
+            " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                         (userUpdate.term,userUpdate.created_at,userUpdate.favorite_count,userUpdate.favorited,userUpdate.filter_level,userUpdate.id_str,
                          userUpdate.lang,userUpdate.possibly_sensitive,userUpdate.retweet_count,userUpdate.source,userUpdate.text,userUpdate.timestamp_ms,
                          userUpdate.user_id_str,userUpdate.user_lang,userUpdate.user_screen_name,userUpdate.user_location,userUpdate.creation_date))
+        self.connection.commit()
+
+    def date_handler(obj):
+        return obj.isoformat() if hasattr(obj, 'isoformat') else obj
+
     def GetUserUpdates(self):
-        return self.session.execute("select * from wlm.user_updates limit 10 ")
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "select term,created_at,favorite_count,favorited, filter_level, id_str, lang,possibly_sensitive, retweet_count,source, text, timestamp_ms, user_id_str, user_lang, user_screen_name, user_location,creation_date from user_updates ")
+        fetchall = cursor.fetchall()
+        returnValues = []
+        for row in fetchall:
+            returnValues.append(UserUpdate.UserUpdate(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14],row[15],row[16]))
+        return returnValues
 
     def SaveProcessedTweet(self,processedTweet):
-        return self.session.execute("insert into wlm.processed_updates(term,id_str,text,latitude,longitude,country,state,city,creation_date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)",(processedTweet.term,processedTweet.id_str,processedTweet.text,processedTweet.latitude,processedTweet.longitude,processedTweet.country,processedTweet.state,processedTweet.city,processedTweet.creation_date))
+        cursor = self.connection.cursor()
+        return cursor.execute("insert into processed_updates(term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                    (processedTweet.term,processedTweet.id_str,processedTweet.text,processedTweet.latitude,processedTweet.longitude,processedTweet.country,processedTweet.state,processedTweet.city,processedTweet.creation_date,processedTweet.polarity,processedTweet.subjectivity,processedTweet.classification,processedTweet.neg_score,processedTweet.pos_score))
 
-
+    def Backup(self):
+        updates = self.GetUserUpdates()
+        result = []
+        for userUpdate in updates:
+            result.append(userUpdate)
+        resultString  = dumps([ob.__dict__ for ob in result],default=json_serial)
+        with open('UserUpdatesBack.json','w') as _file:
+            _file.write(resultString)
 # def SaveUserUpdate(userUpdate)
 #     cluster = Cluster(['192.168.10.103'])
 #     session = cluster.connect("wlm")
 #     session.execute("insert into userupdates (terms_id,content,creation_Date) VALUES(%s,%s,%s)",
 #                     (term.Id, term.Content, term.CreationDate))
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, datetime):
+        serial = obj.isoformat()
+        return serial
+    raise TypeError ("Type not serializable")

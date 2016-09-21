@@ -17,7 +17,6 @@ auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 
 storage = Storage.Storage()
-storage.Initialize()
 
 
 def GetTems():
@@ -28,19 +27,6 @@ def GetTems():
 
 
 terms = GetTems()
-
-
-class Dict2Obj(object):
-    """
-    Turns a dictionary into a class
-    """
-
-    # ----------------------------------------------------------------------
-    def __init__(self, dictionary):
-        """Constructor"""
-        for key in dictionary:
-            setattr(self, key, dictionary[key])
-
 
 class Listener(StreamListener):
     def on_data(self, data):
