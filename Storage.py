@@ -67,8 +67,9 @@ class Storage:
 
     def SaveProcessedTweet(self,processedTweet):
         cursor = self.connection.cursor()
-        return cursor.execute("insert into processed_updates(term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+        cursor.execute("insert into processed_updates(term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                                     (processedTweet.term,processedTweet.id_str,processedTweet.text,processedTweet.latitude,processedTweet.longitude,processedTweet.country,processedTweet.state,processedTweet.city,processedTweet.creation_date,processedTweet.polarity,processedTweet.subjectivity,processedTweet.classification,processedTweet.neg_score,processedTweet.pos_score))
+        self.connection.commit()
 
     def Backup(self):
         updates = self.GetUserUpdates()

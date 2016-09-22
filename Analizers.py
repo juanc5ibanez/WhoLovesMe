@@ -15,9 +15,9 @@ from textblob.sentiments import NaiveBayesAnalyzer
 class Analizers:
 
     def __init__(self):
-        #pigeo.load_model_unzipped()
+        pigeo.load_model_unzipped()
         self.storage = Storage.Storage()
-        self.storage.Backup();
+        #self.storage.Backup();
 
     def ProcessUpdates(self):
 
@@ -42,4 +42,4 @@ class Analizers:
 
 
 analizer = Analizers()
-#analizer.ProcessUpdates()
+analizer.ProcessUpdates()
