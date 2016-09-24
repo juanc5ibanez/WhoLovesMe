@@ -15,12 +15,11 @@ from textblob.sentiments import NaiveBayesAnalyzer
 class Analizers:
 
     def __init__(self):
-        pigeo.load_model_unzipped()
+        #pigeo.load_model_unzipped()
         self.storage = Storage.Storage()
         #self.storage.Backup();
 
     def ProcessUpdates(self):
-
         userUpdates = self.storage.GetUserUpdates()
         tb = Blobber(analyzer=NaiveBayesAnalyzer())
         for userUpdate in userUpdates:
@@ -40,6 +39,10 @@ class Analizers:
 
             self.storage.SaveProcessedTweet(processedTweet)
 
-
+    def GroupProcessedUpdates(self):
+        self.storage.GroupAnalyzedUpdatesByCountry()
+        self.storage.GroupAnalyzedUpdatesByState()
+        self.storage.GroupAnalyzedUpdatesByCity()
 analizer = Analizers()
-analizer.ProcessUpdates()
+#analizer.ProcessUpdates()
+analizer.GroupProcessedUpdates()

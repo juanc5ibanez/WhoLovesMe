@@ -5,8 +5,11 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Who loves me, Who loves me not</title>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap/css/bootstrap-theme.min.css') }}">
+        <link rel=stylesheet type="text/css" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}"/>
+        <link rel=stylesheet type="text/css" href="{{ url_for('static', filename='bootstrap/css/bootstrap-theme.min.css') }}"/>
+        <link rel=stylesheet type="text/css" href="{{ url_for('static', filename='styles/main.css') }}"/>
+         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Leaflet-dvf/css/dvf.css') }}" />
     </head>
     <body>
         <nav class="navbar navbar-default navbar-static-top">
@@ -44,7 +47,11 @@
         <div class="container">
             {% block body %}{% endblock %}
         </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+        <script src="{{ url_for('static', filename='Leaflet-dvf/js/leaflet-dvf.js') }}"></script>
+{#        <script src="{{ url_for('static', filename='Leaflet-dvf/js/leaflet-dvf.markers.js') }}"></script>#}
+    {% block scripts %}{% endblock %}
     </body>
 </html>

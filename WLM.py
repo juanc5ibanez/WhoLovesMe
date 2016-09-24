@@ -3,6 +3,7 @@ import uuid
 
 import Storage
 import Term
+from json import dumps
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
@@ -32,6 +33,12 @@ def terms():
 def delete_term(termId=None):
     storage.DeteTerm(Term.Term('',id = uuid.UUID(termId)))
     return redirect(url_for('terms'))
+
+@app.route('/')
+def index():
+    storageResult = storage.GetGroupAnalyzedUpdatesByCountry()
+    jsonData = dumps(storageResult)
+    return render_template('Index.html',jsonData = jsonData)
 
 
 

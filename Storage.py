@@ -3,6 +3,7 @@ import uuid
 
 from datetime import datetime
 
+from Term import ProcessedCity
 import Term
 from json import dumps
 
@@ -20,6 +21,11 @@ class Storage:
             "CREATE TABLE IF NOT EXISTS user_updates(term text, created_at text, favorite_count int, favorited boolean, filter_level text, id_str text, lang text,possibly_sensitive boolean, retweet_count integer,source text, text text, timestamp_ms text, user_id_str text, user_lang text, user_screen_name text, user_location text,creation_date timestamp , PRIMARY KEY(id_str) )")
         cursor.execute(
             "CREATE TABLE IF NOT EXISTS processed_updates(term text,id_str text,text text,latitude double precision,longitude double precision,country text,state text,city text,creation_date timestamp,polarity double precision,subjectivity double precision,classification text,neg_score double precision,pos_score double precision,PRIMARY KEY(id_str))")
+        cursor.execute("CREATE TABLE IF NOT EXISTS processed_updates_by_country(country text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(country) )")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS processed_updates_by_state(country text,state text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(country,state) )")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS processed_updates_by_city(country text, state text, city text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(country, state, city) )")
         self.connection.commit()
         #self.Backup()
 
@@ -79,6 +85,35 @@ class Storage:
         resultString  = dumps([ob.__dict__ for ob in result],default=json_serial)
         with open('UserUpdatesBack.json','w') as _file:
             _file.write(resultString)
+
+    def GroupAnalyzedUpdatesByCountry(self):
+        cursor = self.connection.cursor()
+        cursor.execute("truncate processed_updates_by_country")
+        cursor.execute("insert into processed_updates_by_country select country ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by country ")
+        self.connection.commit()
+
+    def GroupAnalyzedUpdatesByState(self):
+        cursor = self.connection.cursor()
+        cursor.execute("truncate processed_updates_by_state")
+        cursor.execute("insert into processed_updates_by_state select country , state,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by country, state ")
+        self.connection.commit()
+
+    def GroupAnalyzedUpdatesByCity(self):
+        cursor = self.connection.cursor()
+        cursor.execute("truncate processed_updates_by_city")
+        cursor.execute("insert into processed_updates_by_city select country,state,city ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by country,state,city ")
+        self.connection.commit()
+
+    def GetGroupAnalyzedUpdatesByCountry(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT country ,latitude ,longitude  ,polarity ,subjectivity ,neg_score ,pos_score FROM processed_updates_by_country")
+        data = cursor.fetchall()
+        result = []
+        for entry in data:
+            objectEntry = ProcessedCity(entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6])
+            result.append(objectEntry.__dict__)
+        return result
+
 # def SaveUserUpdate(userUpdate)
 #     cluster = Cluster(['192.168.10.103'])
 #     session = cluster.connect("wlm")
