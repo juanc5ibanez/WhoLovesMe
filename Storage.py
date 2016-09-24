@@ -114,6 +114,10 @@ class Storage:
             result.append(objectEntry.__dict__)
         return result
 
+    def DeleteProcessedUpdates(self):
+        cursor = self.connection.cursor()
+        cursor.execute("truncate processed_updates")
+
 # def SaveUserUpdate(userUpdate)
 #     cluster = Cluster(['192.168.10.103'])
 #     session = cluster.connect("wlm")
