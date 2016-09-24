@@ -101,17 +101,45 @@
 		return new L.RadialBarChartMarker(latlng, options);
 	};
 
+	var addCallout = function(country,latlng){
+      var callout = new L.Callout(latlng, {
+			direction: L.CalloutLine.DIRECTION.NW,
+			lineStyle: L.CalloutLine.LINESTYLE.STRAIGHT,
+			numberOfSides: 3,
+			arrow: true,
+			color: '#C0C0C0',
+			fillColor: '#C0C0C0',
+			position: new L.Point(-60, 0),
+			size: new L.Point(40, 0),
+			icon: new L.DivIcon({
+				iconSize: new L.Point(80, 50),
+				html: '<div>' + country + '</div>',
+				className: 'callout-text'
+			})
+		});
+
+		return callout;
+    };
+
     var data = {{ jsonData | safe }}
 
-    var layerGroup = new L.LayerGroup();
+    {#var layerGroup = new L.LayerGroup();
 
     map.addLayer(layerGroup);
-    layerControl.addOverlay(layerGroup, 'results');
+    layerControl.addOverlay(layerGroup, 'results');#}
 
     for(var i in data)
     {
         dataItem = data[i];
-        layerGroup.addLayer( addMarker( new L.LatLng(dataItem.latitude,dataItem.longitude),dataItem.polarity,dataItem.subjectivity,dataItem.neg_score,dataItem.pos_score))
+        var layerGroup = new L.LayerGroup();
+        map.addLayer(layerGroup);
+		map.addLayer(layerGroup);
+		layerControl.addOverlay(layerGroup, dataItem.country);
+        var latLng = new L.LatLng(dataItem.latitude,dataItem.longitude);
+        var marker = addMarker( latLng,dataItem.polarity,dataItem.subjectivity,dataItem.neg_score,dataItem.pos_score);
+        var callout = addCallout(dataItem.country,latLng);
+        layerGroup.addLayer(callout);
+        layerGroup.addLayer(marker);
     }
 
 </script>

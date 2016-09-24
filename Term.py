@@ -6,8 +6,8 @@ class Term:
         self.Content = content
         self.CreationDate = creation_date
 class ProcessedCity:
-    def __init__(self, city,latitude,longitude,polarity,subjectivity,neg_score,pos_score):
-        self.city = city
+    def __init__(self, country, latitude, longitude, polarity, subjectivity, neg_score, pos_score):
+        self.country = country
         self.latitude = latitude
         self.longitude = longitude
         self.polarity = polarity
