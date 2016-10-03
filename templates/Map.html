@@ -15,11 +15,71 @@
             background-color: #292929;
         }
     </style>
+    <div class="row">
+        <div class="col-xs-3">
+            Term:
+            <select id="termId" class="form-control">
+                {% for term in result['terms'] %}
+                    {%   if term.Id == result['selectedTerm']  %}
+                        <option value="{{ term.Id }}" selected="selected">{{ term.Content }}</option>
+                    {% else %}
+                        <option value="{{ term.Id }}">{{ term.Content }}</option>
+                    {% endif %}
+                {%  endfor %}
+            </select>
+        </div>
+        <div class="col-xs-3">
+            Start date:
+            <div class='input-group date' >
+                    <input type='text' class="form-control" id='startDate' value="{{ result['startDate'] }}" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+            </div>
+        </div>
+        <div class="col-xs-3">
+            End date:
+            <div class='input-group date' >
+                    <input type='text' class="form-control" id='endDate' value="{{ result['endDate'] }}"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+            </div>
+        </div>
+        <div class="col-xs-3" >
+            <span>Execute filter</span>
+            <input type="button" class="btn btn-success form-control" value="Filter" id="filterBtn">
+        </div>
+    </div>
+    <br/>
     <div id="map"></div>
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
     <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.3.0"></script>
+    <script type="text/javascript">
+        $('#filterBtn').click(function(){
+            var term = $('#termId').val();
+            var startDate = $('#startDate').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+            var endDate = $('#endDate').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+            {% if result['type'] == 'byCountry' %}
+                var relocation = '{{ url_for('by_countries')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
+            {% elif result['type'] == 'byState' %}
+                var relocation = '{{ url_for('by_states')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
+            {% else %}
+                var relocation = '{{ url_for('by_cities')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
+            {% endif %}
+            console.log(relocation);
+            window.location.href = relocation;
+        });
+    </script>
+    <script type="text/javascript">
+            $(function () {
+                $('#startDate, #endDate').datepicker({
+  dateFormat: "yy-mm-dd"
+});
+            });
+        </script>
 <script type="text/javascript">
 
 
@@ -121,7 +181,7 @@
 		return callout;
     };
 
-    var data = {{ jsonData | safe }}
+    var data = {{ result['jsonData'] | safe }}
 
     {#var layerGroup = new L.LayerGroup();
 

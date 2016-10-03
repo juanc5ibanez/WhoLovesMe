@@ -10,6 +10,9 @@
         <link rel=stylesheet type="text/css" href="{{ url_for('static', filename='styles/main.css') }}"/>
          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Leaflet-dvf/css/dvf.css') }}" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery/jquery-ui.css') }}" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery/jquery-ui.structure.css') }}" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery/jquery-ui.theme.css') }}" />
     </head>
     <body>
         <nav class="navbar navbar-default navbar-static-top">
@@ -40,6 +43,24 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Terms
+                            <span class="caret">
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="{{ url_for('by_countries') }}" >By country</a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('by_states') }}" >By state</a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('by_cities') }}" >By city</a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
                 </div>
             </div>
@@ -51,6 +72,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
         <script src="{{ url_for('static', filename='Leaflet-dvf/js/leaflet-dvf.js') }}"></script>
+        <script src="{{ url_for('static', filename='jquery/jquery-ui.js') }}"></script>
 {#        <script src="{{ url_for('static', filename='Leaflet-dvf/js/leaflet-dvf.markers.js') }}"></script>#}
     {% block scripts %}{% endblock %}
     </body>

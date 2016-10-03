@@ -21,11 +21,11 @@ class Storage:
             "CREATE TABLE IF NOT EXISTS user_updates(term text, created_at text, favorite_count int, favorited boolean, filter_level text, id_str text, lang text,possibly_sensitive boolean, retweet_count integer,source text, text text, timestamp_ms text, user_id_str text, user_lang text, user_screen_name text, user_location text,creation_date timestamp , PRIMARY KEY(id_str) )")
         cursor.execute(
             "CREATE TABLE IF NOT EXISTS processed_updates(term text,id_str text,text text,latitude double precision,longitude double precision,country text,state text,city text,creation_date timestamp,polarity double precision,subjectivity double precision,classification text,neg_score double precision,pos_score double precision,PRIMARY KEY(id_str))")
-        cursor.execute("CREATE TABLE IF NOT EXISTS processed_updates_by_country(country text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(country) )")
+        cursor.execute("CREATE TABLE IF NOT EXISTS processed_updates_by_country(processed_date timestamp,term text,country text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(processed_date,term,country) )")
         cursor.execute(
-            "CREATE TABLE IF NOT EXISTS processed_updates_by_state(country text,state text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(country,state) )")
+            "CREATE TABLE IF NOT EXISTS processed_updates_by_state(processed_date timestamp,term text,country text,state text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(processed_date,term,country,state) )")
         cursor.execute(
-            "CREATE TABLE IF NOT EXISTS processed_updates_by_city(country text, state text, city text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(country, state, city) )")
+            "CREATE TABLE IF NOT EXISTS processed_updates_by_city(processed_date timestamp,term text,country text, state text, city text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(processed_date,term,country, state, city) )")
         self.connection.commit()
         #self.Backup()
 
@@ -89,24 +89,44 @@ class Storage:
     def GroupAnalyzedUpdatesByCountry(self):
         cursor = self.connection.cursor()
         cursor.execute("truncate processed_updates_by_country")
-        cursor.execute("insert into processed_updates_by_country select country ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by country ")
+        cursor.execute("insert into processed_updates_by_country select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by 1,2,3")
         self.connection.commit()
 
     def GroupAnalyzedUpdatesByState(self):
         cursor = self.connection.cursor()
         cursor.execute("truncate processed_updates_by_state")
-        cursor.execute("insert into processed_updates_by_state select country , state,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by country, state ")
+        cursor.execute("insert into processed_updates_by_state select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country , state,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by 1,2,3,4 ")
         self.connection.commit()
 
     def GroupAnalyzedUpdatesByCity(self):
         cursor = self.connection.cursor()
         cursor.execute("truncate processed_updates_by_city")
-        cursor.execute("insert into processed_updates_by_city select country,state,city ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by country,state,city ")
+        cursor.execute("insert into processed_updates_by_city select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state,city ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by 1,2,3,4,5 ")
         self.connection.commit()
 
-    def GetGroupAnalyzedUpdatesByCountry(self):
+    def GetGroupAnalyzedUpdatesByCountry(self,start_date,end_date,term):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT country ,latitude ,longitude  ,polarity ,subjectivity ,neg_score ,pos_score FROM processed_updates_by_country")
+        cursor.execute("SELECT country ,avg(latitude) ,avg(longitude) ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score) FROM processed_updates_by_country where processed_date > %s and processed_date < %s and term = (select content from terms where terms_id = %s) group by country",(start_date,end_date,term))
+        data = cursor.fetchall()
+        result = []
+        for entry in data:
+            objectEntry = ProcessedCity(entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6])
+            result.append(objectEntry.__dict__)
+        return result
+
+    def GetGroupAnalyzedUpdatesByState(self,start_date,end_date,term):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT state ,avg(latitude) ,avg(longitude) ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score) FROM processed_updates_by_state where processed_date > %s and processed_date < %s and term = (select content from terms where terms_id = %s) group by country,state",(start_date,end_date,term))
+        data = cursor.fetchall()
+        result = []
+        for entry in data:
+            objectEntry = ProcessedCity(entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6])
+            result.append(objectEntry.__dict__)
+        return result
+
+    def GetGroupAnalyzedUpdatesByCity(self,start_date,end_date,term):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT city ,avg(latitude) ,avg(longitude) ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score) FROM processed_updates_by_city where processed_date > %s and processed_date < %s and term = (select content from terms where terms_id = %s) group by country,state,city",(start_date,end_date,term))
         data = cursor.fetchall()
         result = []
         for entry in data:

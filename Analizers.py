@@ -44,8 +44,8 @@ class Analizers:
         self.storage.GroupAnalyzedUpdatesByCountry()
         self.storage.GroupAnalyzedUpdatesByState()
         self.storage.GroupAnalyzedUpdatesByCity()
-# analizer = Analizers()
-# analizer.ProcessUpdates()
-# analizer.GroupProcessedUpdates()
-nvc = NaiveBayesAnalyzer()
-alg0 = ''
+analizer = Analizers()
+#analizer.ProcessUpdates()
+analizer.GroupProcessedUpdates()
+#nvc = NaiveBayesAnalyzer()
+#alg0 = ''

@@ -106,7 +106,7 @@ def index():
 	RESTful API
 	index.html page provides a simple web UI that given a text, geolocates it and puts a marker on a Google map.
 	'''
-	return render_template('index.html')
+	return render_template('Map.html')
 
 @app.route('/geo', methods=['GET', 'POST'])
 def geo_web():
