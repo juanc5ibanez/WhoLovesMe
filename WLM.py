@@ -69,7 +69,7 @@ def by_countries():
     storageResult = storage.GetGroupAnalyzedUpdatesByCountry(startDate,endDate,termId)
     jsonData = dumps(storageResult)
 
-    return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCountries"})
+    return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCountry"})
 
 @app.route('/Map/States')
 def by_states():
@@ -86,7 +86,7 @@ def by_states():
     storageResult = storage.GetGroupAnalyzedUpdatesByState(startDate,endDate,termId)
     jsonData = dumps(storageResult)
 
-    return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCountries"})
+    return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byState"})
 
 @app.route('/Map/City')
 def by_cities():
@@ -103,9 +103,34 @@ def by_cities():
     storageResult = storage.GetGroupAnalyzedUpdatesByCity(startDate,endDate,termId)
     jsonData = dumps(storageResult)
 
-    return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCountries"})
+    return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCity"})
 
+@app.route('/Tweets/Country')
+def TweetsByCountry():
+    termId = request.args['termId']
+    startDate = request.args['startDate']
+    endDate = request.args['endDate']
+    entity = request.args['entity']
+    processedTweets  = storage.getProcessedTweetByCountry(entity,startDate,endDate,termId)
+    return render_template('ProcessedTweets.html',tweets= processedTweets)
 
+@app.route('/Tweets/State')
+def TweetsByState():
+    termId = request.args['termId']
+    startDate = request.args['startDate']
+    endDate = request.args['endDate']
+    entity = request.args['entity']
+    processedTweets  = storage.getProcessedTweetByState(entity,startDate,endDate,termId)
+    return render_template('ProcessedTweets.html',tweets= processedTweets)
+
+@app.route('/Tweets/City')
+def TweetsByCity():
+    termId = request.args['termId']
+    startDate = request.args['startDate']
+    endDate = request.args['endDate']
+    entity = request.args['entity']
+    processedTweets  = storage.getProcessedTweetByCity(entity,startDate,endDate,termId)
+    return render_template('ProcessedTweets.html',tweets= processedTweets)
 
 if __name__ == '__main__':
     app.run()

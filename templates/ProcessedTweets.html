@@ -1,0 +1,78 @@
+{%  extends "Layout.html" %}
+{% block body %}
+    <table class="table">
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Text
+            </th>
+            <th>
+                Country
+            </th>
+            <th>
+                State
+            </th>
+            <th>
+                City
+            </th>
+            <th>
+                Creation Date
+            </th>
+            <th>
+                Polarity
+            </th>
+            <th>
+                Subjectivity
+            </th>
+            <th>
+                classification
+            </th>
+            <th>
+                Negative Score
+            </th>
+            <th>
+                Positive Score
+            </th>
+        </tr>
+
+    {% for tweet in tweets %}
+        <tr>
+            <td>
+                {{ tweet.id_str }}
+            </td>
+            <td>
+                {{ tweet.text }}
+            </td>
+            <td>
+                {{ tweet.country }}
+            </td>
+            <td>
+                {{ tweet.state }}
+            </td>
+            <td>
+                {{ tweet.city }}
+            </td>
+            <td>
+                {{ tweet.creation_date }}
+            </td>
+            <td>
+                {{ tweet.polarity }}
+            </td>
+            <td>
+                {{ tweet.subjectivity }}
+            </td>
+            <td>
+                {{ tweet.classification }}
+            </td>
+            <td>
+                {{ tweet.neg_score }}
+            </td>
+            <td>
+                {{ tweet.pos_score }}
+            </td>
+        </tr>
+    {%  endfor %}
+    </table>
+{% endblock %}

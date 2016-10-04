@@ -69,7 +69,6 @@
             {% else %}
                 var relocation = '{{ url_for('by_cities')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
             {% endif %}
-            console.log(relocation);
             window.location.href = relocation;
         });
     </script>
@@ -87,7 +86,7 @@
 
     var map = new L.Map("map", {
         center: new L.LatLng(0, 0),
-        zoom: 12
+        zoom: 0
     });
     var baseLayer = new L.StamenTileLayer("toner");
     baseLayer.addTo(map);
@@ -95,7 +94,7 @@
 		'Stamen Toner': baseLayer
 	}).addTo(map);
 
-    addMarker = function (latlng,polarity,subjectivity,neg_score,pos_score) {
+    addMarker = function (latlng,polarity,subjectivity,neg_score,pos_score,name) {
 		var colorValue = Math.random() * 360;
 		var options = {
 			color: '#000',
@@ -110,7 +109,8 @@
 			},
 			offset: 0,
 			numberOfSides: 50,
-			width: 10
+			width: 10,
+            entityName:name
 		};
 
 		options.data = {
@@ -158,7 +158,29 @@
 				}
 			}
 		};
-		return new L.RadialBarChartMarker(latlng, options);
+        var radialBarChartMarker = new L.RadialBarChartMarker(latlng, options);
+        radialBarChartMarker.on('click',function(e){
+            var term = $('#termId').val();
+            var startDate = $('#startDate').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+            var endDate = $('#endDate').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+            {% if result['type'] == 'byCountry' %}
+                var relocation = '{{ url_for('TweetsByCountry')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate+'&entity='+e.layer.options.entityName;
+            {% elif result['type'] == 'byState' %}
+                var relocation = '{{ url_for('TweetsByState')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate+'&entity='+e.layer.options.entityName;
+            {% else %}
+                var relocation = '{{ url_for('TweetsByCity')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate+'&entity='+e.layer.options.entityName;
+            {% endif %}
+            var win = window.open(relocation, '_blank');
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert('Please allow popups for this website');
+            }
+        })
+        //debugger;
+        return radialBarChartMarker;
 	};
 
 	var addCallout = function(country,latlng){
@@ -196,7 +218,7 @@
 		map.addLayer(layerGroup);
 		layerControl.addOverlay(layerGroup, dataItem.country);
         var latLng = new L.LatLng(dataItem.latitude,dataItem.longitude);
-        var marker = addMarker( latLng,dataItem.polarity,dataItem.subjectivity,dataItem.neg_score,dataItem.pos_score);
+        var marker = addMarker( latLng,dataItem.polarity,dataItem.subjectivity,dataItem.neg_score,dataItem.pos_score,dataItem.country);
         var callout = addCallout(dataItem.country,latLng);
         layerGroup.addLayer(callout);
         layerGroup.addLayer(marker);

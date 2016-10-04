@@ -3,6 +3,7 @@ import uuid
 
 from datetime import datetime
 
+import ProcessedTweet
 from Term import ProcessedCity
 import Term
 from json import dumps
@@ -137,6 +138,34 @@ class Storage:
     def DeleteProcessedUpdates(self):
         cursor = self.connection.cursor()
         cursor.execute("truncate processed_updates")
+
+
+    def getProcessedTweetByCountry(self,country,start_date,end_date,term):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score FROM processed_updates where country =%s and creation_date > %s and creation_date < %s and term = (select content from terms where terms_id = %s)",(country,start_date,end_date,term))
+        result = []
+        for entry in cursor.fetchall():
+            processedTweet = ProcessedTweet.ProcessedTweet(entry[0],entry[1],entry[2].decode('utf-8'),entry[3],entry[4],entry[5],entry[6],entry[7],entry[8],entry[9],entry[10],entry[11],entry[12],entry[13])
+            result.append(processedTweet)
+        return result
+
+    def getProcessedTweetByState(self, state, start_date, end_date, term):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score FROM processed_updates where state =%s and creation_date > %s and creation_date < %s and term = (select content from terms where terms_id = %s)", (state, start_date, end_date, term))
+        result = []
+        for entry in cursor.fetchall():
+            processedTweet = ProcessedTweet.ProcessedTweet(entry[0],entry[1],entry[2].decode('utf-8'),entry[3],entry[4],entry[5],entry[6],entry[7],entry[8],entry[9],entry[10],entry[11],entry[12],entry[13])
+            result.append(processedTweet)
+        return result
+
+    def getProcessedTweetByCity(self, city, start_date, end_date, term):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score FROM processed_updates where city =%s and creation_date > %s and creation_date < %s and term = (select content from terms where terms_id = %s)", (city, start_date, end_date, term))
+        result = []
+        for entry in cursor.fetchall():
+            processedTweet = ProcessedTweet.ProcessedTweet(entry[0],entry[1],entry[2].decode('utf-8'),entry[3],entry[4],entry[5],entry[6],entry[7],entry[8],entry[9],entry[10],entry[11],entry[12],entry[13])
+            result.append(processedTweet)
+        return result
 
 # def SaveUserUpdate(userUpdate)
 #     cluster = Cluster(['192.168.10.103'])
