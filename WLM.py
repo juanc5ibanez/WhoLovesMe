@@ -9,6 +9,10 @@ from json import dumps
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 from werkzeug.routing import BaseConverter, ValidationError
+import thread
+import TwitterFeeder
+from TwitterFeeder import FeedingThread
+
 
 class DateConverter(BaseConverter):
     """Extracts a ISO8601 date from the path and validates it."""
@@ -24,11 +28,17 @@ class DateConverter(BaseConverter):
     def to_url(self, value):
         return value.strftime('%Y-%m-%d')
 
+def startStreaming():
+    feeder = TwitterFeeder.TwitterFeeder()
+    feeder.StartFeeding()
+
+
+
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.url_map.converters['date'] = DateConverter
 storage = Storage.Storage()
-
+feeder = FeedingThread()
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
@@ -131,6 +141,16 @@ def TweetsByCity():
     entity = request.args['entity']
     processedTweets  = storage.getProcessedTweetByCity(entity,startDate,endDate,termId)
     return render_template('ProcessedTweets.html',tweets= processedTweets)
+
+@app.route('/Utility/StopFeeder')
+def StopFeeder():
+    feeder.stop()
+    return redirect(url_for('terms'))
+
+@app.route('/Utility/StartFeeder')
+def StartFeeder():
+    feeder.start()
+    return redirect(url_for('terms'))
 
 if __name__ == '__main__':
     app.run()
