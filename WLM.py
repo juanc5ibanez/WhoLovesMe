@@ -3,6 +3,7 @@ import uuid
 
 import datetime
 
+import Analizers
 import Storage
 import Term
 from json import dumps
@@ -39,10 +40,14 @@ app.config.from_object(__name__)
 app.url_map.converters['date'] = DateConverter
 storage = Storage.Storage()
 feeder = FeedingThread()
+isAnalizerRunning = False
+analizer = Analizers.Analizers(isAnalizerRunning)
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
-
+def runAnalizers():
+    analizer.ProcessUpdates()
+    analizer.GroupProcessedUpdates()
 
 @app.route('/Terms/Add',methods=['GET'])
 def add_term():
@@ -152,5 +157,12 @@ def StartFeeder():
     feeder.start()
     return redirect(url_for('terms'))
 
+@app.route('/Utility/StartAnalizer')
+def StartAnalizer():
+    if isAnalizerRunning == False:
+        thread.start_new_thread(runAnalizers,())
+    return redirect(url_for('terms'))
+
 if __name__ == '__main__':
     app.run()
+
