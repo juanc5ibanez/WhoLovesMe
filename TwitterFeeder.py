@@ -88,8 +88,6 @@ class Listener(StreamListener):
                 for term in self.terms:
                     if term.lower() in lowerText:
                         matchingTerm = term
-                print(parsedData)
-                print (matchingTerm)
                 if matchingTerm:
                     update = UserUpdate.UserUpdate(matchingTerm, parsedData.get('created_at',default), parsedData.get('favorite_count',default),
                                                    parsedData.get('favorited',default), parsedData.get('filter_level',default), parsedData.get('id_str',default),
