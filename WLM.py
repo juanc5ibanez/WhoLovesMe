@@ -1,6 +1,6 @@
 import os
 import uuid
-
+import traceback
 import datetime
 
 import Analizers
@@ -41,7 +41,7 @@ app.url_map.converters['date'] = DateConverter
 storage = Storage.Storage()
 feeder = FeedingThread()
 isAnalizerRunning = False
-analizer = Analizers.Analizers(isAnalizerRunning)
+analizer = ""#Analizers.Analizers(isAnalizerRunning)
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
@@ -154,7 +154,11 @@ def StopFeeder():
 
 @app.route('/Utility/StartFeeder')
 def StartFeeder():
-    feeder.start()
+    try:
+        feeder.start()
+    except:
+        tb = traceback.format_exc()
+        print traceback.format_exc()
     return redirect(url_for('terms'))
 
 @app.route('/Utility/StartAnalizer')
@@ -164,5 +168,5 @@ def StartAnalizer():
     return redirect(url_for('terms'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0',port=8080)
 

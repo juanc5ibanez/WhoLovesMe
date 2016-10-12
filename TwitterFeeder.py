@@ -79,22 +79,27 @@ class Listener(StreamListener):
         self.isStopped = isStopped
 
     def on_data(self, data):
-        parsedData = json.loads(data)
-        matchingTerm = ""
-        default = None
-        for term in self.terms:
-            if term.lower() in parsedData['text'].lower():
-                matchingTerm = term
-        print(parsedData)
-        print (matchingTerm)
-        if matchingTerm:
-            update = UserUpdate.UserUpdate(matchingTerm, parsedData.get('created_at',default), parsedData.get('favorite_count',default),
-                                           parsedData.get('favorited',default), parsedData.get('filter_level',default), parsedData.get('id_str',default),
-                                           parsedData.get('lang',default), parsedData.get('possibly_sensitive',default), parsedData.get('retweet_count',default),
-                                           parsedData.get('source',default),
-                                           parsedData.get('text',default), parsedData.get('timestamp_ms',default), parsedData.get('user',default).get('id_str',default),
-                                           parsedData.get('user',default).get('lang',default), parsedData.get('user',default).get('screen_name',default), parsedData.get('user',default).get('location',default))
-            self.storage.SaveUserUpdate(update)
+        try:
+            parsedData = json.loads(data)
+            matchingTerm = ""
+            default = None
+            if('text' in parsedData):
+                lowerText = parsedData['text'].lower()
+                for term in self.terms:
+                    if term.lower() in lowerText:
+                        matchingTerm = term
+                print(parsedData)
+                print (matchingTerm)
+                if matchingTerm:
+                    update = UserUpdate.UserUpdate(matchingTerm, parsedData.get('created_at',default), parsedData.get('favorite_count',default),
+                                                   parsedData.get('favorited',default), parsedData.get('filter_level',default), parsedData.get('id_str',default),
+                                                   parsedData.get('lang',default), parsedData.get('possibly_sensitive',default), parsedData.get('retweet_count',default),
+                                                   parsedData.get('source',default),
+                                                   parsedData.get('text',default), parsedData.get('timestamp_ms',default), parsedData.get('user',default).get('id_str',default),
+                                                   parsedData.get('user',default).get('lang',default), parsedData.get('user',default).get('screen_name',default), parsedData.get('user',default).get('location',default))
+                    self.storage.SaveUserUpdate(update)
+        except ValueError:
+            print ValueError
         return self.isStopped() == False
 
     def on_error(self, error):
