@@ -184,6 +184,7 @@ class Storage:
         connection = self.__getConnection()
         cursor = connection.cursor()
         cursor.execute("truncate processed_updates")
+        connection.commit();
         cursor.close()
         connection.close()
 

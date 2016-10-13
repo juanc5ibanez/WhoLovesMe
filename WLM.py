@@ -41,7 +41,7 @@ app.url_map.converters['date'] = DateConverter
 storage = Storage.Storage()
 feeder = FeedingThread()
 isAnalizerRunning = False
-analizer = ""#Analizers.Analizers(isAnalizerRunning)
+analizer = #Analizers.Analizers(isAnalizerRunning)
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
