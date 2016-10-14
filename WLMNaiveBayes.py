@@ -241,13 +241,13 @@ class NaiveBayesAnalyzerWLM(BaseSentimentAnalyzer):
 # f = open('my_classifier.pickle', 'wb')
 # pickle.dump(analyzer, f)
 # f.close()
-f = open('my_classifier.pickle', 'rb')
-classifier = pickle.load(f)
-f.close()
-tb = Blobber(analyzer=classifier)
-for tweet in algo:
-    blob = tb(tweet)
-    bayes_sentiment = blob.sentiment
-    print bayes_sentiment.classification
+# f = open('my_classifier.pickle', 'rb')
+# classifier = pickle.load(f)
+# f.close()
+# tb = Blobber(analyzer=classifier)
+# for tweet in algo:
+#     blob = tb(tweet)
+#     bayes_sentiment = blob.sentiment
+#     print bayes_sentiment.classification
 #     with open('fullCorpusTest.csv', 'r') as fptest:
 #         print cl.accuracy(fptest)
