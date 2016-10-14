@@ -14,7 +14,7 @@ from textblob import Blobber
 from textblob.sentiments import NaiveBayesAnalyzer
 
 from collections import namedtuple
-
+import string
 import nltk
 
 from textblob.en import sentiment as pattern_sentiment
@@ -57,7 +57,8 @@ class Analizers:
         while(shouldContinue):
             for userUpdate in userUpdates:
                 print counter;
-                userUpdate.text = userUpdate.text.replace("@","").decode('utf-8')
+                printable = set(string.printable)
+                userUpdate.text = ''.join(filter(lambda x: x in printable, userUpdate.text))
                 unprocessedUpdates.append(userUpdate);
                 if(unprocessedUpdates.__len__()==1000):
                     self.processLocation(unprocessedUpdates,tb);

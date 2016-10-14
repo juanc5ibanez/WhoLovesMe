@@ -41,13 +41,13 @@ app.url_map.converters['date'] = DateConverter
 storage = Storage.Storage()
 feeder = FeedingThread()
 isAnalizerRunning = False
-analizer = #Analizers.Analizers(isAnalizerRunning)
+#analizer = Analizers.Analizers(isAnalizerRunning)
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
-def runAnalizers():
-    analizer.ProcessUpdates()
-    analizer.GroupProcessedUpdates()
+#def runAnalizers():
+#    analizer.ProcessUpdates()
+#    analizer.GroupProcessedUpdates()
 
 @app.route('/Terms/Add',methods=['GET'])
 def add_term():
@@ -161,11 +161,11 @@ def StartFeeder():
         print traceback.format_exc()
     return redirect(url_for('terms'))
 
-@app.route('/Utility/StartAnalizer')
-def StartAnalizer():
-    if isAnalizerRunning == False:
-        thread.start_new_thread(runAnalizers,())
-    return redirect(url_for('terms'))
+#@app.route('/Utility/StartAnalizer')
+#def StartAnalizer():
+#    if isAnalizerRunning == False:
+#        thread.start_new_thread(runAnalizers,())
+#    return redirect(url_for('terms'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=8080)
