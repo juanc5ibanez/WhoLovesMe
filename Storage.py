@@ -99,7 +99,7 @@ class Storage:
     def SaveProcessedTweet(self,processedTweet):
         connection = self.__getConnection()
         cursor = connection.cursor()
-        cursor.execute("insert into processed_updates(term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+        cursor.execute("insert into processed_updates(term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict (id_str) do update set term = EXCLUDED.term,text= EXCLUDED.text,latitude= EXCLUDED.latitude,longitude= EXCLUDED.longitude,country= EXCLUDED.country,state= EXCLUDED.state,city= EXCLUDED.city,creation_date= EXCLUDED.creation_date,polarity= EXCLUDED.polarity,subjectivity= EXCLUDED.subjectivity,classification= EXCLUDED.classification,neg_score= EXCLUDED.neg_score,pos_score= EXCLUDED.pos_score",
                                     (processedTweet.term,processedTweet.id_str,processedTweet.text,processedTweet.latitude,processedTweet.longitude,processedTweet.country,processedTweet.state,processedTweet.city,processedTweet.creation_date,processedTweet.polarity,processedTweet.subjectivity,processedTweet.classification,processedTweet.neg_score,processedTweet.pos_score))
         connection.commit()
         cursor.close()
@@ -225,6 +225,31 @@ class Storage:
         connection.close()
         return result
 
+    def transportToProcessed(self):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute("insert into processed_updates(term,id_str,text,latitude,longitude,country,state,city,creation_date,polarity,subjectivity,classification,neg_score,pos_score) SELECT term,id_str,text,null,null,null,null,null,creation_date,null,null,null,null,null from user_updates")
+        connection.commit();
+        cursor.close()
+        connection.close()
+
+    def GetUnprocessedUpdates(self):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute(
+            "select term, id_str,  text, creation_date from processed_updates where country is null limit 15000")
+        fetchall = cursor.fetchall()
+        returnValues = []
+        for row in fetchall:
+            unprocessedUpdate = UserUpdate.UserUpdateUnprocessed();
+            unprocessedUpdate.term = row[0]
+            unprocessedUpdate.id_str = row[1]
+            unprocessedUpdate.text = row[2]
+            unprocessedUpdate.creation_date = row[3]
+            returnValues.append(unprocessedUpdate)
+        cursor.close()
+        connection.close()
+        return returnValues
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""

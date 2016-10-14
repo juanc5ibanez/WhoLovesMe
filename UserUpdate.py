@@ -1,6 +1,9 @@
 import datetime
 class UserUpdate:
 
+    def __init__(self):
+        pass
+
     def __init__(self,term,created_at,favorite_count,favorited,filter_level,id_str,lang,possibly_sensitive,retweet_count,source,text,timestamp_ms,user_id_str,user_lang,user_screen_name,user_location,creation_date = datetime.datetime.now()):
         self.term = term
         self.favorite_count = favorite_count
@@ -19,3 +22,7 @@ class UserUpdate:
         self.user_location = user_location
         self.created_at = created_at
         self.creation_date = creation_date
+
+class UserUpdateUnprocessed:
+    def __init__(self):
+        pass

@@ -37,7 +37,7 @@ class Analizers:
 
     def ProcessUpdates(self):
         isWorking = True
-        userUpdates = self.storage.GetUserUpdates()
+
         f = open('my_classifier.pickle', 'rb')
         classifier = pickle.load(f)
         f.close()
@@ -49,16 +49,22 @@ class Analizers:
         print 'trained'
         tb = Blobber(analyzer=classifier)
         self.storage.DeleteProcessedUpdates();
+        self.storage.transportToProcessed()
         counter = 1;
         unprocessedUpdates = []
-        for userUpdate in userUpdates:
-            print counter;
-            userUpdate.text = userUpdate.text.replace("@","").decode('utf-8')
-            unprocessedUpdates.append(userUpdate);
-            if(unprocessedUpdates.__len__()==1000):
-                self.processLocation(unprocessedUpdates,tb);
-                unprocessedUpdates = []
-            counter = counter+1;
+        shouldContinue = True
+        userUpdates = self.storage.GetUnprocessedUpdates()
+        while(shouldContinue):
+            for userUpdate in userUpdates:
+                print counter;
+                userUpdate.text = userUpdate.text.replace("@","").decode('utf-8')
+                unprocessedUpdates.append(userUpdate);
+                if(unprocessedUpdates.__len__()==1000):
+                    self.processLocation(unprocessedUpdates,tb);
+                    unprocessedUpdates = []
+                counter = counter+1;
+            self.processLocation(unprocessedUpdates, tb);
+            shouldContinue = (userUpdates.__len__()>0)
         isWorking = False
 
     def processLocation(self,unprocessedUpdates,textBlob):
