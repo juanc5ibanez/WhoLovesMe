@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from datetime import time
 
 import datetime
-
+import pickle
 import ProcessedTweet
 import Storage
 import pigeo
@@ -79,9 +79,11 @@ class Analizers:
     def ProcessUpdates(self):
         isWorking = True
         userUpdates = self.storage.GetUserUpdates()
-        analyzer = NaiveBayesAnalyzerWLM()
+        f = open('my_classifier.pickle', 'rb')
+        classifier = pickle.load(f)
+        f.close()
 
-        tb = Blobber(analyzer=analyzer)
+        tb = Blobber(analyzer=classifier)
         self.storage.DeleteProcessedUpdates();
         counter = 1;
         unprocessedUpdates = []
