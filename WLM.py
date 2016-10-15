@@ -86,6 +86,25 @@ def by_countries():
 
     return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCountry"})
 
+@app.route('/Map/CountCountries')
+def by_countries_count():
+    terms = storage.GetTerms()
+    termId = request.args.get('termId')
+    if termId is None:
+        termId = terms[0].Id
+    startDate  = request.args.get('startDate')
+    if startDate is None:
+        startDate = (datetime.datetime.now().date() - datetime.timedelta(6*365/12))
+    endDate = request.args.get('endDate')
+    if endDate is None:
+        endDate = (datetime.datetime.now().date())
+    storageResult = storage.GetGroupAnalyzedUpdatesByCountryCount(startDate,endDate,termId)
+    jsonData = dumps(storageResult)
+
+    return render_template('MapBars.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCountry"})
+
+
+
 @app.route('/Map/States')
 def by_states():
     terms = storage.GetTerms()
@@ -103,6 +122,23 @@ def by_states():
 
     return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byState"})
 
+@app.route('/Map/CountStates')
+def by_states_count():
+    terms = storage.GetTerms()
+    termId = request.args.get('termId')
+    if termId is None:
+        termId = terms[0].Id
+    startDate  = request.args.get('startDate')
+    if startDate is None:
+        startDate = (datetime.datetime.now().date() - datetime.timedelta(6*365/12))
+    endDate = request.args.get('endDate')
+    if endDate is None:
+        endDate = (datetime.datetime.now().date())
+    storageResult = storage.GetGroupAnalyzedUpdatesByStateCount(startDate,endDate,termId)
+    jsonData = dumps(storageResult)
+
+    return render_template('MapBars.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byState"})
+
 @app.route('/Map/City')
 def by_cities():
     terms = storage.GetTerms()
@@ -119,6 +155,23 @@ def by_cities():
     jsonData = dumps(storageResult)
 
     return render_template('Map.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCity"})
+
+@app.route('/Map/CountCity')
+def by_cities_count():
+    terms = storage.GetTerms()
+    termId = request.args.get('termId')
+    if termId is None:
+        termId = terms[0].Id
+    startDate  = request.args.get('startDate')
+    if startDate is None:
+        startDate = (datetime.datetime.now().date() - datetime.timedelta(6*365/12))
+    endDate = request.args.get('endDate')
+    if endDate is None:
+        endDate = (datetime.datetime.now().date())
+    storageResult = storage.GetGroupAnalyzedUpdatesByCityCount(startDate,endDate,termId)
+    jsonData = dumps(storageResult)
+
+    return render_template('MapBars.html', result = {'jsonData':jsonData, 'terms': terms, 'selectedTerm':termId, 'startDate':startDate, 'endDate':endDate, 'type': "byCity"})
 
 @app.route('/Tweets/Country')
 def TweetsByCountry():
@@ -160,6 +213,7 @@ def StartFeeder():
         tb = traceback.format_exc()
         print traceback.format_exc()
     return redirect(url_for('terms'))
+
 
 #@app.route('/Utility/StartAnalizer')
 #def StartAnalizer():

@@ -63,11 +63,11 @@
             var startDate = $('#startDate').datepicker({ dateFormat: 'dd-mm-yy' }).val();
             var endDate = $('#endDate').datepicker({ dateFormat: 'dd-mm-yy' }).val();
             {% if result['type'] == 'byCountry' %}
-                var relocation = '{{ url_for('by_countries')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
+                var relocation = '{{ url_for('by_countries_count')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
             {% elif result['type'] == 'byState' %}
-                var relocation = '{{ url_for('by_states')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
+                var relocation = '{{ url_for('by_states_count')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
             {% else %}
-                var relocation = '{{ url_for('by_cities')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
+                var relocation = '{{ url_for('by_cities_count')}}?termId='+term+'&startDate='+startDate+'&endDate='+endDate;
             {% endif %}
             window.location.href = relocation;
         });
@@ -94,7 +94,7 @@
 		'Stamen Toner': baseLayer
 	}).addTo(map);
 
-    addMarker = function (latlng,polarity,subjectivity,neg_score,pos_score,name) {
+    addMarker = function (latlng,neg_count,pos_count,name) {
 		var colorValue = Math.random() * 360;
 		var options = {
 			color: '#000',
@@ -108,57 +108,37 @@
 				y: 0
 			},
 			offset: 0,
-			numberOfSides: 50,
-			width: 10,
+			width: 8,
             entityName:name
 		};
 
+		var total  = pos_count + neg_count;
 		options.data = {
-			'polarity': polarity,
-			'subjectivity': subjectivity,
-			'neg_score': neg_score,
-			'pos_score': pos_score
+			'neg_count': neg_count,
+			'pos_count': pos_count
 		};
 
 		options.chartOptions = {
-			'polarity': {
-				fillColor: '#FEE5D9',
+			'neg_count': {
+				fillColor: '#FF4040',
 				minValue: 0,
-				maxValue: 1,
-				maxHeight: 20,
+				maxValue: total,
+				maxHeight: 30,
 				displayText: function (value) {
 					return value.toFixed(2);
 				}
 			},
-			'subjectivity': {
-				fillColor: '#FCAE91',
+			'pos_count': {
+				fillColor: '#008000',
 				minValue: 0,
-				maxValue: 1,
-				maxHeight: 20,
-				displayText: function (value) {
-					return value.toFixed(2);
-				}
-			},
-			'neg_score': {
-				fillColor: '#FB6A4A',
-				minValue: 0,
-				maxValue: 1,
-				maxHeight: 20,
-				displayText: function (value) {
-					return value.toFixed(2);
-				}
-			},
-			'pos_score': {
-				fillColor: '#CB181D',
-				minValue: 0,
-				maxValue: 1,
-				maxHeight: 20,
+				maxValue: total,
+				maxHeight: 30,
 				displayText: function (value) {
 					return value.toFixed(2);
 				}
 			}
 		};
-        var radialBarChartMarker = new L.RadialBarChartMarker(latlng, options);
+        var radialBarChartMarker = new L.BarChartMarker(latlng, options);
         radialBarChartMarker.on('click',function(e){
             var term = $('#termId').val();
             var startDate = $('#startDate').datepicker({ dateFormat: 'dd-mm-yy' }).val();
@@ -218,7 +198,7 @@
 		map.addLayer(layerGroup);
 		layerControl.addOverlay(layerGroup, dataItem.country);
         var latLng = new L.LatLng(dataItem.latitude,dataItem.longitude);
-        var marker = addMarker( latLng,dataItem.polarity,dataItem.subjectivity,dataItem.neg_score,dataItem.pos_score,dataItem.country);
+        var marker = addMarker( latLng,dataItem.neg_count,dataItem.pos_count,dataItem.country);
         var callout = addCallout(dataItem.country,latLng);
         layerGroup.addLayer(callout);
         layerGroup.addLayer(marker);

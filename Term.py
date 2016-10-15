@@ -14,3 +14,11 @@ class ProcessedCity:
         self.subjectivity = subjectivity
         self.neg_score = neg_score
         self.pos_score = pos_score
+
+class ProcessedCityCount:
+    def __init__(self, country, latitude, longitude, neg_score, pos_score):
+        self.country = country
+        self.latitude = latitude
+        self.longitude = longitude
+        self.neg_count = neg_score
+        self.pos_count = pos_score

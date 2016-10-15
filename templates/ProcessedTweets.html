@@ -75,7 +75,8 @@
                             value:{{ tweet.polarity }}*100,
                             min:-100,
                             max:100,
-                            title:"Polarity"
+                            title:"Polarity",
+                            levelColors: ["#FB6A4A","#57F22A"]
                         })
                     })
                 </script>
@@ -89,16 +90,17 @@
                             value:{{  tweet.subjectivity}}*100,
                             min:0,
                             max:100,
-                            title:"Subjectivity"
+                            title:"Subjectivity",
+                            levelColors: ["#57F22A","#FB6A4A"]
                         })
                     })
                 </script>
             </td>
-            <td>
+            <td style="vertical-align: middle">
                 {% if tweet.classification == 'neg' %}
-                    <span class="label label-danger">{{ tweet.classification }}</span>
+                    <span class="label label-danger"  style="font-size: 30px">{{ tweet.classification }}</span>
                 {% else %}
-                    <span class="label label-success">{{ tweet.classification }}</span>
+                    <span class="label label-success" style="font-size: 30px">{{ tweet.classification }}</span>
                 {% endif %}
             </td>
             <td>
@@ -111,6 +113,7 @@
                             min:0,
                             max:100,
                             title:"Negative",
+                            levelColors: ["#FB6A4A"],
                             levelColorsGradient: false
                         })
                     })
@@ -126,6 +129,7 @@
                             min:0,
                             max:100,
                             title:"Positive",
+                            levelColors: ["#57F22A"],
                             levelColorsGradient: false
                         })
                     })

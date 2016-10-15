@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 
 import ProcessedTweet
-from Term import ProcessedCity
+from Term import ProcessedCity,ProcessedCityCount
 import Term
 from json import dumps
 
@@ -27,6 +27,11 @@ class Storage:
             "CREATE TABLE IF NOT EXISTS processed_updates_by_state(processed_date timestamp,term text,country text,state text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(processed_date,term,country,state) )")
         cursor.execute(
             "CREATE TABLE IF NOT EXISTS processed_updates_by_city(processed_date timestamp,term text,country text, state text, city text,latitude double precision,longitude double precision,polarity double precision,subjectivity double precision,neg_score double precision,pos_score double precision, primary key(processed_date,term,country, state, city) )")
+        cursor.execute("CREATE TABLE IF NOT EXISTS processed_updates_by_country_count( processed_date timestamp,term text,country text,latitude double precision,longitude double precision, neg_count  int,pos_count  int)")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS processed_updates_by_state_count( processed_date timestamp,term text,country text,state text,latitude double precision,longitude double precision, neg_count  int,pos_count  int)")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS processed_updates_by_city_count( processed_date timestamp,term text,country text,state text,city text,latitude double precision,longitude double precision, neg_count  int,pos_count  int)")
         connection.commit()
         cursor.close()
         connection.close()
@@ -118,7 +123,10 @@ class Storage:
         connection = self.__getConnection()
         cursor = connection.cursor()
         cursor.execute("truncate processed_updates_by_country")
-        cursor.execute("insert into processed_updates_by_country select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by 1,2,3")
+        cursor.execute("insert into processed_updates_by_country select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where latitude is null group by 1,2,3")
+        cursor.execute("truncate processed_updates_by_country_count")
+        cursor.execute(
+            "insert into processed_updates_by_country_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where latitude is not null group by 1,2,3")
         connection.commit()
         cursor.close()
         connection.close()
@@ -127,7 +135,10 @@ class Storage:
         connection = self.__getConnection()
         cursor = connection.cursor()
         cursor.execute("truncate processed_updates_by_state")
-        cursor.execute("insert into processed_updates_by_state select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country , state,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by 1,2,3,4 ")
+        cursor.execute("insert into processed_updates_by_state select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country , state,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where latitude is null group by 1,2,3,4 ")
+        cursor.execute("truncate processed_updates_by_state_count")
+        cursor.execute(
+            "insert into processed_updates_by_state_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where latitude is not null group by 1,2,3,4")
         connection.commit()
         cursor.close()
         connection.close()
@@ -136,10 +147,15 @@ class Storage:
         connection = self.__getConnection()
         cursor = connection.cursor()
         cursor.execute("truncate processed_updates_by_city")
-        cursor.execute("insert into processed_updates_by_city select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state,city ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates group by 1,2,3,4,5 ")
+        cursor.execute("insert into processed_updates_by_city select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state,city ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where latitude is null group by 1,2,3,4,5 ")
+        cursor.execute("truncate processed_updates_by_city_count")
+        cursor.execute(
+            "insert into processed_updates_by_city_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state,city ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where latitude is not null group by 1,2,3,4,5")
         connection.commit()
         cursor.close()
         connection.close()
+
+
 
     def GetGroupAnalyzedUpdatesByCountry(self,start_date,end_date,term):
         connection = self.__getConnection()
@@ -175,6 +191,49 @@ class Storage:
         result = []
         for entry in data:
             objectEntry = ProcessedCity(entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6])
+            result.append(objectEntry.__dict__)
+        cursor.close()
+        connection.close()
+        return result
+
+    def GetGroupAnalyzedUpdatesByCountryCount(self,start_date,end_date,term):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT country ,latitude ,longitude ,neg_count ,pos_count FROM processed_updates_by_country_count where processed_date > %s and processed_date < %s and term = (select content from terms where terms_id = %s)",(start_date,end_date,term))
+        data = cursor.fetchall()
+        result = []
+        for entry in data:
+            objectEntry = ProcessedCityCount(entry[0],entry[1],entry[2],entry[3],entry[4])
+            result.append(objectEntry.__dict__)
+        cursor.close()
+        connection.close()
+        return result
+
+    def GetGroupAnalyzedUpdatesByStateCount(self,start_date,end_date,term):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT state ,latitude ,longitude ,neg_count ,pos_count FROM processed_updates_by_state_count where processed_date > %s and processed_date < %s and term = (select content from terms where terms_id = %s)",
+            (start_date, end_date, term))
+        data = cursor.fetchall()
+        result = []
+        for entry in data:
+            objectEntry = ProcessedCityCount(entry[0],entry[1],entry[2],entry[3],entry[4])
+            result.append(objectEntry.__dict__)
+        cursor.close()
+        connection.close()
+        return result
+
+    def GetGroupAnalyzedUpdatesByCityCount(self,start_date,end_date,term):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT city ,latitude ,longitude ,neg_count ,pos_count FROM processed_updates_by_city_count where processed_date > %s and processed_date < %s and term = (select content from terms where terms_id = %s)",
+            (start_date, end_date, term))
+        data = cursor.fetchall()
+        result = []
+        for entry in data:
+            objectEntry = ProcessedCityCount(entry[0],entry[1],entry[2],entry[3],entry[4])
             result.append(objectEntry.__dict__)
         cursor.close()
         connection.close()
@@ -220,6 +279,42 @@ class Storage:
         result = []
         for entry in cursor.fetchall():
             processedTweet = ProcessedTweet.ProcessedTweet(entry[0],entry[1],entry[2].decode('utf-8'),entry[3],entry[4],entry[5],entry[6],entry[7],entry[8],entry[9],entry[10],entry[11],entry[12],entry[13])
+            result.append(processedTweet)
+        cursor.close()
+        connection.close()
+        return result
+
+    def getProcessedTweetByCountryCount(self,country,start_date,end_date,term):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT term,id_str,text,latitude,longitude,country,state,city,creation_date,neg_count,pos_count FROM processed_updates_by_country_count where country =%s and creation_date > %s and creation_date < %s and term = (select content from terms where terms_id = %s)",(country,start_date,end_date,term))
+        result = []
+        for entry in cursor.fetchall():
+            processedTweet = ProcessedTweet.ProcessedTweetCount(entry[0],entry[1],entry[2].decode('utf-8'),entry[3],entry[4],entry[5],entry[6],entry[7],entry[8],entry[9],entry[10])
+            result.append(processedTweet)
+        cursor.close()
+        connection.close()
+        return result
+
+    def getProcessedTweetByStateCount(self, state, start_date, end_date, term):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT term,id_str,text,latitude,longitude,country,state,city,creation_date,neg_count,pos_count FROM processed_updates_by_state_count where state =%s and creation_date > %s and creation_date < %s and term = (select content from terms where terms_id = %s)", (state, start_date, end_date, term))
+        result = []
+        for entry in cursor.fetchall():
+            processedTweet = ProcessedTweet.ProcessedTweetCount(entry[0],entry[1],entry[2].decode('utf-8'),entry[3],entry[4],entry[5],entry[6],entry[7],entry[8],entry[9],entry[10])
+            result.append(processedTweet)
+        cursor.close()
+        connection.close()
+        return result
+
+    def getProcessedTweetByCityCount(self, city, start_date, end_date, term):
+        connection = self.__getConnection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT term,id_str,text,latitude,longitude,country,state,city,creation_date,neg_count,pos_count FROM processed_updates_by_city_count where city =%s and creation_date > %s and creation_date < %s and term = (select content from terms where terms_id = %s)", (city, start_date, end_date, term))
+        result = []
+        for entry in cursor.fetchall():
+            processedTweet = ProcessedTweet.ProcessedTweetCount(entry[0],entry[1],entry[2].decode('utf-8'),entry[3],entry[4],entry[5],entry[6],entry[7],entry[8],entry[9],entry[10])
             result.append(processedTweet)
         cursor.close()
         connection.close()

@@ -65,6 +65,7 @@ class Analizers:
                     unprocessedUpdates = []
                 counter = counter+1;
             self.processLocation(unprocessedUpdates, tb);
+            unprocessedUpdates = []
             shouldContinue = (userUpdates.__len__()>0)
         isWorking = False
 
