@@ -38,7 +38,7 @@ class Storage:
         #self.Backup()
     
     def __getConnection(self):
-        return psycopg2.connect("host='172.17.0.3' user=postgres password=Aa@123456 dbname=wlm")
+        return psycopg2.connect("host='172.17.0.2' user=postgres password=Aa@123456 dbname=wlm")
     
 
     def SaveTerm(self,term):
@@ -123,10 +123,10 @@ class Storage:
         connection = self.__getConnection()
         cursor = connection.cursor()
         cursor.execute("truncate processed_updates_by_country")
-        cursor.execute("insert into processed_updates_by_country select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where latitude is null group by 1,2,3")
+        cursor.execute("insert into processed_updates_by_country select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where country is null group by 1,2,3")
         cursor.execute("truncate processed_updates_by_country_count")
         cursor.execute(
-            "insert into processed_updates_by_country_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where latitude is not null group by 1,2,3")
+            "insert into processed_updates_by_country_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where country is not null group by 1,2,3")
         connection.commit()
         cursor.close()
         connection.close()
@@ -135,10 +135,10 @@ class Storage:
         connection = self.__getConnection()
         cursor = connection.cursor()
         cursor.execute("truncate processed_updates_by_state")
-        cursor.execute("insert into processed_updates_by_state select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country , state,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where latitude is null group by 1,2,3,4 ")
+        cursor.execute("insert into processed_updates_by_state select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country , state,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where country is null group by 1,2,3,4 ")
         cursor.execute("truncate processed_updates_by_state_count")
         cursor.execute(
-            "insert into processed_updates_by_state_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where latitude is not null group by 1,2,3,4")
+            "insert into processed_updates_by_state_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where country is not null group by 1,2,3,4")
         connection.commit()
         cursor.close()
         connection.close()
@@ -150,7 +150,7 @@ class Storage:
         cursor.execute("insert into processed_updates_by_city select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state,city ,avg(latitude) ,avg(longitude)  ,avg(polarity) ,avg(subjectivity) ,avg(neg_score) ,avg(pos_score)  from processed_updates where latitude is null group by 1,2,3,4,5 ")
         cursor.execute("truncate processed_updates_by_city_count")
         cursor.execute(
-            "insert into processed_updates_by_city_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state,city ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where latitude is not null group by 1,2,3,4,5")
+            "insert into processed_updates_by_city_count select date_trunc('day', processed_updates.creation_date) \"day\" ,term,country,state,city ,avg(latitude) ,avg(longitude) ,sum(case when classification = 'neg' then 1 else 0 end) as neg_count ,sum(case when classification = 'pos' then 1 else 0 end) as pos_count  from processed_updates where country is not null group by 1,2,3,4,5")
         connection.commit()
         cursor.close()
         connection.close()
